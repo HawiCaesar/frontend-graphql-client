@@ -10,7 +10,9 @@ from . import models
 class UserNode(DjangoObjectType):
     class Meta:
         model = User
-        filter_fields = {}
+        filter_fields = {
+                'first_name': ['contains'],
+                }
         interfaces = (relay.Node,)
 
 
