@@ -1,0 +1,12 @@
+version: '3'
+services:
+  python:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./server:/example/
+    ports:
+      - '${DAUPLER_BACKEND_PORT:-8000}:8000'
+    environment:
+      - PYTHONDONTWRITEBYTECODE=True

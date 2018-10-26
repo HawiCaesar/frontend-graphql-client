@@ -1,0 +1,71 @@
+- model: auth.User
+  pk: 1
+  fields:
+    username: schwartz
+    first_name: Schwartz
+    last_name: Braunweiss
+- model: auth.User
+  pk: 2
+  fields:
+    username: ace
+    first_name: Ace
+    last_name: Ventura
+
+- model: app.Store
+  pk: 1
+  fields:
+    name: Schwartz Shop
+    owner: 1
+
+- model: app.Product
+  pk: 1
+  fields:
+    store: 1
+    name: Alligator eyes
+    price: 10.99
+- model: app.Product
+  pk: 2
+  fields:
+    store: 1
+    name: Bat eyes
+    price: 1.99
+- model: app.Product
+  pk: 3
+  fields:
+    store: 1
+    name: Cat eyes
+    price: 12.99
+- model: app.Product
+  pk: 4
+  fields:
+    store: 1
+    name: Dog tails
+    price: 120.99
+- model: app.Product
+  pk: 5
+  fields:
+    store: 1
+    name: Elephant tusks
+    price: 1999.99
+
+- model: app.Order
+  pk: 1
+  fields:
+    store: 1
+    date: 2010-02-11 11:02:57 -7
+    ordered_by: 2
+
+- model: app.OrderItem
+  pk: 1
+  fields:
+    order: 1
+    product: 1
+    price: 9.99
+    quantity: 31
+- model: app.OrderItem
+  pk: 2
+  fields:
+    order: 1
+    product: 3
+    price: 1.99
+    quantity: 120
