@@ -1,12 +1,7 @@
-import {
-	Environment,
-	Network,
-	RecordSource,
-	Store,
-} from 'relay-runtime';
+import { Environment, Network, RecordSource, Store } from 'relay-runtime';
 
 function fetchQuery(operation, variables) {
-	return fetch('/graphql/', {
+	return fetch('/graphql-relay/', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',

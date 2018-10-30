@@ -16,6 +16,11 @@
   fields:
     name: Schwartz Shop
     owner: 1
+- model: app.Store
+  pk: 2
+  fields:
+    name: Cinco de Mayo
+    owner: 1
 
 - model: app.Product
   pk: 1
