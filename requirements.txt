@@ -1,6 +1,7 @@
 django==1.11.15
-graphene-django
-djangorestframework
 django-filter
+djangorestframework
+graphene-django
+graphene-django-optimizer
 ipython
 pyyaml

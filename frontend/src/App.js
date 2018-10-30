@@ -10,27 +10,43 @@ export default class App extends React.Component {
 			<QueryRenderer
 				environment={environment}
 				query={graphql`query AppQuery {
-					allUsers {
+					store(id: "U3RvcmVOb2RlOjE=") {
+						id
+						name
+					}
+					allProducts {
 						edges {
 							node {
-								id,
-								username,
+								id
+								name
+								price
 							}
 						}
 					}
 				}`}
 				variables={{}}
 				render={({error, props}) => {
-					console.log(props);
 					if (error) {
 						console.log(error);
 						return <div>Error!</div>;
 					}
 					if (!props) {
-						return <div>Loading...</div>;
+						return <div>Loading data...</div>;
 					}
+					const users = props.allProducts.edges.map((edge, idx) => {
+						return (
+							<pre key={edge.node.id} style={{padding: 10}}>
+								{JSON.stringify(edge.node, null, 2)}
+							</pre>
+						);
+					});
 					return (
-						<div>Loaded</div>
+						<div>
+							<pre>
+								{JSON.stringify(props.store, null, 2)}
+							</pre>
+							{users}
+						</div>
 					);
 				}}
 			/>
