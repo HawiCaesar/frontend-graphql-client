@@ -53,6 +53,7 @@
     name: Elephant tusks
     price: 1999.99
 
+
 - model: app.Order
   pk: 1
   fields:
@@ -71,6 +72,75 @@
   pk: 2
   fields:
     order: 1
+    product: 3
+    price: 1.99
+    quantity: 120
+
+
+- model: app.Order
+  pk: 2
+  fields:
+    store: 1
+    date: 2018-02-11 11:05:57 -7
+    ordered_by: 2
+
+- model: app.OrderItem
+  pk: 3
+  fields:
+    order: 2
+    product: 1
+    price: 9.99
+    quantity: 31
+- model: app.OrderItem
+  pk: 4
+  fields:
+    order: 2
+    product: 3
+    price: 1.99
+    quantity: 120
+
+
+- model: app.Order
+  pk: 3
+  fields:
+    store: 1
+    date: 2020-02-11 11:05:57 -7
+    ordered_by: 2
+
+- model: app.OrderItem
+  pk: 5
+  fields:
+    order: 2
+    product: 1
+    price: 9.99
+    quantity: 31
+- model: app.OrderItem
+  pk: 6
+  fields:
+    order: 2
+    product: 3
+    price: 1.99
+    quantity: 120
+
+
+- model: app.Order
+  pk: 4
+  fields:
+    store: 1
+    date: 2018-02-11 11:05:57 -7
+    ordered_by: 2
+
+- model: app.OrderItem
+  pk: 7
+  fields:
+    order: 2
+    product: 1
+    price: 9.99
+    quantity: 31
+- model: app.OrderItem
+  pk: 8
+  fields:
+    order: 2
     product: 3
     price: 1.99
     quantity: 120

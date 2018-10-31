@@ -1,12 +1,12 @@
 import graphene
 import graphene_django_optimizer as gql_optimizer  # noqa
 from django.contrib.auth.models import User
-from graphene import relay
-from graphene_django.types import DjangoObjectType
+from graphene import ObjectType, relay
 from graphene_django.filter import DjangoFilterConnectionField
+from graphene_django.rest_framework.mutation import SerializerMutation
+from graphene_django.types import DjangoObjectType
 
-
-from . import models
+from . import models, serializers
 
 
 ################################################################################
@@ -83,7 +83,9 @@ class UserNode(DjangoObjectType):
 class StoreNode(DjangoObjectType):
     class Meta:
         model = models.Store
-        filter_fields = {}
+        filter_fields = {
+                'name': ['contains'],
+                }
         interfaces = (relay.Node,)
 
 
@@ -127,4 +129,13 @@ class Query(graphene.ObjectType):
     all_order_items = DjangoFilterConnectionField(OrderItemNode)
 
 
-relay_schema = graphene.Schema(query=Query)
+class StoreMutation(SerializerMutation):
+    class Meta:
+        serializer_class = serializers.StoreSerializer
+
+
+class Mutation(ObjectType):
+    createOrUpdateStore = StoreMutation.Field()
+
+
+relay_schema = graphene.Schema(query=Query, mutation=Mutation)
