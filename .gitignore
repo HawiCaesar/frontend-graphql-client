@@ -194,3 +194,5 @@ lerna-debug.log
 Thumbs.db
 
 __generated__/
+server/relay-schema.json
+server/apollo-schema.json
