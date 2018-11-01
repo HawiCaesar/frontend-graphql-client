@@ -8,7 +8,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 const client = new ApolloClient({
-  uri: `https://nx9zvp49q7.lp.gql.zone/graphql`
+  uri: `/graphql-relay/`
 });
 
 // client
