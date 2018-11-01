@@ -6,43 +6,40 @@ To cleanly stop the backend run `docker-compose down`.
 
 # Mutation examples
 
-Create:
+Create a product:
 
 ```graphql
-mutation {
-	createOrUpdateStore(input: {
-	name: "Original name"
-	owner: "1"
-	}) {
-		clientMutationId
-		errors {
-			field
-			messages
+mutation AddProductToStore {
+	addProductToStore(input: {
+		storeId: "U3RvcmVOb2RlOjE="
+		name: "New product name!"
+		price: 10.99
+		}) {
+		product {
+			id
+				store {
+					id
+						name
+				}
 		}
-		id
-		name
-		owner
 	}
 }
 ```
 
-Update:
+outputs
 
-```graphql
-mutation {
-	createOrUpdateStore(input: {
-	pk: 1,
-	name: "New Names"
-	owner: "1"
-	}) {
-		clientMutationId
-		errors {
-			field
-			messages
+```json
+{
+	"data": {
+		"addProductToStore": {
+			"product": {
+				"id": "UHJvZHVjdE5vZGU6MTE=",
+					"store": {
+						"id": "U3RvcmVOb2RlOjE=",
+						"name": "New Names"
+					}
+			}
 		}
-		id
-		name
-		owner
 	}
 }
 ```
