@@ -1,112 +1,110 @@
 import React, { Component } from 'react';
-import { Query, ApolloConsumer } from "react-apollo";
+import { Query, /*ApolloConsumer*/ Mutation } from "react-apollo";
 import gql from "graphql-tag";
 import './App.css';
 
-const GET_DOGS = gql`
-  {
-    dogs {
-      id
-      breed
+const GET_STORES = gql`
+{
+  allStores {
+    edges {
+      node {
+        id
+        name
+        owner {
+          id
+          username
+          lastLogin
+        }
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
     }
   }
+}
 `;
 
-const Dogs = ({ onDogSelected }) => (
-  <Query query={GET_DOGS}>
-    {({ loading, error, data }) => {
-      if (loading) return "Loading...";
-      if (error) return `Error! ${error.message}`;
-
-      return (
-        <select name="dog" onChange={onDogSelected}>
-          {data.dogs.map(dog => (
-            <option key={dog.id} value={dog.breed}>
-              {dog.breed}
-            </option>
-          ))}
-        </select>
-      );
-    }}
-  </Query>
-);
-
-const GET_DOG_PHOTO = gql`
-  query dog($breed: String!) {
-    dog(breed: $breed) {
-      id
-      displayImage
-    }
-  }
-`;
-
-const DogPhoto = ({ breed }) => (
+const Stores = () => (
   <Query
-    query={GET_DOG_PHOTO}
-    variables={{ breed }}
-    notifyOnNetworkStatusChange
-    // pollInterval={500}
+    query={GET_STORES}
   >
-    {({ loading, error, data, refetch, networkStatus }) => {
-      if (networkStatus === 4) return "Refetching!";
-      if (loading) return null;
-      if (error) return `Error!: ${error}`;
+  {({ loading, error, data }) => {
+    if (loading) return "Loading...";
+    if (error) return `Error! ${error.message}`;
 
-      return (
-        <div>
-          <img
-            src={data.dog.displayImage}
-            style={{ height: 100, width: 100 }}
-            alt=""
-          />
-          <br />
-          <button onClick={() => refetch()}>Refetch!</button>
-        </div>
-      );
-    }}
+    const abc = data.allStores.edges.map((store, index) => (
+      <li key={index}>
+        {store.node.name}
+      </li>
+    ))
+    return (
+      <ul>{abc}</ul>
+    )
+  }}
   </Query>
-);
+)
+// name parameter was required
+const ADD_STORE = gql`
+  mutation ADD_STORE($name: String!, $owner: String!){
+    createOrUpdateStore(input: {
+    name: $name
+    owner: $owner
+    }) {
+      clientMutationId
+      errors {
+        field
+        messages
+      }
+      id
+      name
+      owner
+    }
+  }
+`;
 
 class App extends Component {
   state = { 
-    selectedDog: null,
-    dog: null
+    name: "",
+    owner: "1"
    };
 
-  onDogFetched = dog => this.setState(() => ({ dog }));
-
-  onDogSelected = ({ target }) => {
-    this.setState(() => ({ selectedDog: target.value }));
-  };
+  handleChange = (e) => {
+    this.setState({ name: e.target.value });
+  }
 
   render() {
     return (
       <div className="App">
         <div>
-          <h2>List of Dogs and their pictures</h2>
-          {this.state.selectedDog && (
-            <DogPhoto breed={this.state.selectedDog} />
-          )}
-          <Dogs onDogSelected={this.onDogSelected} />
+          <h2>Results</h2>
+          <Stores />
+          <Mutation mutation={ADD_STORE} variables={this.state}>
+            {(createOrUpdateStore, { data }) => (
+              <div>
+                <form
+                  onSubmit={async e => {
+                    e.preventDefault();
+                    const res = await createOrUpdateStore();
+                    console.log(res);
+                  }}
+                >
+                  <input 
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="name"
+                    required
+                    value={this.state.name}
+                    onChange={this.handleChange}
+                  />
+                  <button type="submit">Add Store</button>
+                </form>
+              </div>
+            )}
+          </Mutation>
         </div>
-        <ApolloConsumer>
-        {client => (
-          <div>
-            {this.state.dog && <img alt="" src={this.state.dog.displayImage} />}
-            <button
-              onClick={async () => {
-                const { data } = await client.query({
-                  query: GET_DOG_PHOTO,
-                  variables: { breed: "bulldog" }
-                });
-                this.onDogFetched(data.dog);
-              }}
-            >
-              Click me!
-            </button>
-          </div>
-        )}
-      </ApolloConsumer>
+
       </div>
     );
   }
