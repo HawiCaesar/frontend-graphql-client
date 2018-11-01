@@ -34,10 +34,10 @@ outputs
 		"addProductToStore": {
 			"product": {
 				"id": "UHJvZHVjdE5vZGU6MTE=",
-					"store": {
-						"id": "U3RvcmVOb2RlOjE=",
-						"name": "New Names"
-					}
+				"store": {
+					"id": "U3RvcmVOb2RlOjE=",
+					"name": "New Names"
+				}
 			}
 		}
 	}
