@@ -3,10 +3,10 @@ import graphene_django_optimizer as gql_optimizer  # noqa
 from django.contrib.auth.models import User
 from graphene import ObjectType, relay
 from graphene_django.filter import DjangoFilterConnectionField
-from graphene_django.rest_framework.mutation import SerializerMutation
+# from graphene_django.rest_framework.mutation import SerializerMutation
 from graphene_django.types import DjangoObjectType
 
-from . import models, serializers
+from . import models, serializers  # noqa
 
 
 ################################################################################
@@ -129,13 +129,27 @@ class Query(graphene.ObjectType):
     all_order_items = DjangoFilterConnectionField(OrderItemNode)
 
 
-class StoreMutation(SerializerMutation):
-    class Meta:
-        serializer_class = serializers.StoreSerializer
+class CreateProductMutation(relay.ClientIDMutation):
+    class Input:
+        store_id = graphene.ID(required=True)
+        name = graphene.String(required=True)
+        price = graphene.Float(required=True)
+
+    product = graphene.Field(ProductNode)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **data):
+        store = graphene.Node.get_node_from_global_id(info, data['store_id'])
+        product = models.Product.objects.create(
+                store=store,
+                name=data['name'],
+                price=data['price'],
+                )
+        return CreateProductMutation(product=product)
 
 
 class Mutation(ObjectType):
-    createOrUpdateStore = StoreMutation.Field()
+    add_product_to_store = CreateProductMutation.Field()
 
 
 relay_schema = graphene.Schema(query=Query, mutation=Mutation)
