@@ -19,7 +19,7 @@ mutation AddProductToStore {
 			id
 				store {
 					id
-						name
+					name
 				}
 		}
 	}
