@@ -2,31 +2,22 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ApolloClient from "apollo-boost";
 import { ApolloProvider } from "react-apollo";
+import { BrowserRouter as Router } from 'react-router-dom';
 // import gql from "graphql-tag";
 import './index.css';
-import App from './App';
+import Routes from './routes/routes';
 import * as serviceWorker from './serviceWorker';
 
 const client = new ApolloClient({
   uri: `/graphql-relay/`
 });
 
-// client
-//   .query({
-//     query: gql`
-//       {
-//         rates(currency: "USD") {
-//           currency
-//         }
-//       }
-//     `
-//   })
-//   .then(result => console.log(result));
-
 const ApolloWrappedApp = () => (
-  <ApolloProvider client={client}>
-    <App />
-  </ApolloProvider>
+  <Router>
+    <ApolloProvider client={client}>
+      <Routes />
+    </ApolloProvider>
+  </Router>
 )
 
 ReactDOM.render(<ApolloWrappedApp />, document.getElementById('root'));

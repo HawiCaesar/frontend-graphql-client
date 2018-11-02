@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import { Query, /*ApolloConsumer*/ Mutation } from "react-apollo";
 import gql from "graphql-tag";
 import './App.css';
@@ -14,6 +15,15 @@ const GET_STORES = gql`
           id
           username
           lastLogin
+        }
+        products {
+          edges {
+            node {
+              id
+              name
+              price
+            }
+          }
         }
       }
     }
@@ -35,7 +45,14 @@ const Stores = () => (
 
     const abc = data.allStores.edges.map((store, index) => (
       <li key={index}>
-        {store.node.name}
+        <Link
+          to={{
+            pathname: `/store/${store.node.id}/products`,
+            state: { storeDetails: store.node, storeProducts: store.node.products.edges }
+          }}
+        >
+          {store.node.name}
+        </Link>
       </li>
     ))
     return (
