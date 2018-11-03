@@ -4,8 +4,8 @@ import { Query, /*ApolloConsumer*/ Mutation } from "react-apollo";
 import gql from "graphql-tag";
 import './App.css';
 
-const GET_STORES = gql`
-{
+export const GET_STORES = gql`
+query StoreList {
   allStores {
     edges {
       node {
