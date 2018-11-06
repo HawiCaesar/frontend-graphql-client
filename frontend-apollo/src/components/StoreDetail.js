@@ -162,38 +162,7 @@ class UpdateStoreProducts extends React.Component {
         {(mutate, {data}) => {
           const handleUpdateSubmit = async e => {
             e.preventDefault();
-            mutate({
-              update: (
-                proxy,
-                {
-                  data: {
-                    updateStoreProduct: {product},
-                  },
-                },
-              ) => {
-                const data = proxy.readQuery({
-                  query: GET_STORE_DETAIL,
-                  variables: this.state,
-                });
-                data.store.products.edges = data.store.products.edges.map(
-                  productEdge => {
-                    if (productEdge.node.id === this.state.productId) {
-                      return {
-                        node: product,
-                        __typename: 'ProductNodeEdge',
-                      };
-                    } else {
-                      return productEdge;
-                    }
-                  },
-                );
-                proxy.writeQuery({
-                  query: GET_STORE_DETAIL,
-                  variables: this.state,
-                  data,
-                });
-              },
-            });
+            mutate();
           };
           return (
             <form onSubmit={handleUpdateSubmit}>
