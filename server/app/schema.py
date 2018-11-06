@@ -3,10 +3,9 @@ import graphene_django_optimizer as gql_optimizer  # noqa
 from django.contrib.auth.models import User
 from graphene import ObjectType, relay
 from graphene_django.filter import DjangoFilterConnectionField
-# from graphene_django.rest_framework.mutation import SerializerMutation
 from graphene_django.types import DjangoObjectType
 
-from . import models, serializers  # noqa
+from . import models
 
 
 ################################################################################
@@ -148,8 +147,29 @@ class CreateProductMutation(relay.ClientIDMutation):
         return CreateProductMutation(product=product)
 
 
+class UpdateProductMutation(relay.ClientIDMutation):
+    class Input:
+        id = graphene.ID(required=True)
+        store_id = graphene.ID(required=False)
+        name = graphene.String(required=False)
+        price = graphene.Float(required=False)
+
+    product = graphene.Field(ProductNode)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **data):
+        product = graphene.Node.get_node_from_global_id(info, data.pop('id'))
+        store_id = data.pop('store_id', None)
+        if store_id:
+            product.store = graphene.Node.get_node_from_global_id(info, store_id)
+        vars(product).update(data)
+        product.save()
+        return UpdateProductMutation(product=product)
+
+
 class Mutation(ObjectType):
     add_product_to_store = CreateProductMutation.Field()
+    update_store_product = UpdateProductMutation.Field()
 
 
 relay_schema = graphene.Schema(query=Query, mutation=Mutation)
