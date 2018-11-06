@@ -43,3 +43,43 @@ outputs
 	}
 }
 ```
+
+Update a product
+
+
+```graphql
+mutation UpdateStoreProduct {
+  updateStoreProduct(input: {
+    id: "UHJvZHVjdE5vZGU6MQ=="
+    storeId: "U3RvcmVOb2RlOjE="
+  }) {
+    product {
+      id
+      name
+      price
+      store {
+        id
+      }
+    }
+  }
+}
+```
+
+outputs
+
+```json
+{
+  "data": {
+    "updateStoreProduct": {
+      "product": {
+        "id": "UHJvZHVjdE5vZGU6MQ==",
+        "name": "Alligator Toes",
+        "price": 11.19,
+        "store": {
+          "id": "U3RvcmVOb2RlOjE="
+        }
+      }
+    }
+  }
+}
+```
