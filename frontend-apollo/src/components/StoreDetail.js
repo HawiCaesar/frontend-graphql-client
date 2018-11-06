@@ -125,8 +125,106 @@ class CreateStore extends React.Component {
   }
 }
 
-export default class StoreDetail extends React.Component {
+class UpdateStoreProducts extends React.Component {
+  state = {
+		name: this.props.productToUpdate.name || '',
+		price: this.props.productToUpdate.price || '',
+    storeId: this.props.storeId,
+    saving: false
+	}
+
+	handleChange = event => {
+		this.setState({ [event.target.name]:  event.target.value});
+  }
   render() {
+    console.log(this.props.productToUpdate, '#####')
+    return (
+      <form>
+        <input
+          type="text"
+          id="productName"
+          name="name"
+          placeholder="Product Name"
+          required
+          value={this.state.name}
+          onChange={this.handleChange}
+        />
+        <br />
+        <input
+          type="number"
+          step="0.01"
+          id="price"
+          name="price"
+          placeholder="Product Price"
+          required
+          value={this.state.price}
+          onChange={this.handleChange}
+        />
+        <button type="submit" disabled={this.state.saving}>Update Product</button>
+        <button onClick={this.props.onListButtonClick}>Back To List</button>
+      </form>
+    )
+  }
+}
+
+class EditButton extends React.Component{
+
+  onHandleClick = () => {
+    this.props.onEditColumnClick(this.props)
+  }
+  render() {
+    return(
+      <button onClick={this.onHandleClick}>---Edit---</button>
+    )
+  }
+}
+
+export default class StoreDetail extends React.Component {
+
+  state = {
+    componentToLoad: "list",
+    productToUpdate: {},
+    storeProducts: []
+  }
+
+  onEditColumnClick = (props) => {
+    console.log(props, '******')
+    this.setState({ 
+      componentToLoad: "update",
+      productToUpdate: props.product
+    })
+  }
+
+  onloadProducts = (products) => {
+    this.setState({storeProducts: products})
+  }
+
+  onAddButtonClick = () => {
+    this.setState({ componentToLoad: "create" });
+  }
+
+  onListButtonClick = () => {
+    this.setState({ componentToLoad: "list"})
+  }
+
+  render() {
+
+    if (this.state.componentToLoad === "create") {
+      return (
+        <CreateStore storeId={this.props.match.params.storeId} onListButtonClick={this.onListButtonClick} />
+      )
+    }
+
+    if (this.state.componentToLoad === "update") {
+      return (
+        <UpdateStoreProducts
+          productToUpdate={this.state.productToUpdate}
+          storeId={this.props.match.params.storeId} 
+          onListButtonClick={this.onListButtonClick}
+        />
+      )
+    }
+
     return (
       <div>
         <Query
@@ -145,6 +243,7 @@ export default class StoreDetail extends React.Component {
                   style={{opacity: product.isOptimistic ? '0.5' : '1'}}>
                   <td>{product.node.name}</td>
                   <td>{product.node.price}</td>
+                  <td><EditButton onEditColumnClick={this.onEditColumnClick} product={product.node}/></td>
                 </tr>
               ),
             );
@@ -157,6 +256,7 @@ export default class StoreDetail extends React.Component {
                     <tr>
                       <th>Name</th>
                       <th>Price</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>{productTableRows}</tbody>
@@ -171,4 +271,5 @@ export default class StoreDetail extends React.Component {
       </div>
     );
   }
+  
 }
