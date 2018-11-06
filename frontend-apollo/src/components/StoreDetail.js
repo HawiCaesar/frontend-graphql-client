@@ -36,6 +36,26 @@ const ADD_PRODUCT_TO_STORE = gql`
   }
 `;
 
+const UPDATE_PRODUCT_IN_STORE = gql`
+mutation UpdateStoreProduct($storeId: ID!, $productId: ID!, $name: String, $price: Float){
+  updateStoreProduct(input: {
+    id: $productId
+    storeId: $storeId
+    name: $name
+    price: $price
+  }) {
+    product {
+      id
+      name
+      price
+      store {
+        id
+      }
+    }
+  }
+}
+`;
+
 class CreateStore extends React.Component {
   state = {
     name: '',
@@ -130,6 +150,7 @@ class UpdateStoreProducts extends React.Component {
 		name: this.props.productToUpdate.name || '',
 		price: this.props.productToUpdate.price || '',
     storeId: this.props.storeId,
+    productId: this.props.productToUpdate.id || '',
     saving: false
 	}
 
@@ -137,32 +158,85 @@ class UpdateStoreProducts extends React.Component {
 		this.setState({ [event.target.name]:  event.target.value});
   }
   render() {
-    console.log(this.props.productToUpdate, '#####')
+    console.log(this.props.storeId, '@!@@!!@!@@!!@!@')
     return (
-      <form>
-        <input
-          type="text"
-          id="productName"
-          name="name"
-          placeholder="Product Name"
-          required
-          value={this.state.name}
-          onChange={this.handleChange}
-        />
-        <br />
-        <input
-          type="number"
-          step="0.01"
-          id="price"
-          name="price"
-          placeholder="Product Price"
-          required
-          value={this.state.price}
-          onChange={this.handleChange}
-        />
-        <button type="submit" disabled={this.state.saving}>Update Product</button>
-        <button onClick={this.props.onListButtonClick}>Back To List</button>
-      </form>
+      <Mutation mutation={UPDATE_PRODUCT_IN_STORE} variables={this.state}>
+        {(mutate, {data}) => {
+          const handleUpdateSubmit = async e => {
+            e.preventDefault();
+            mutate({
+              optimisticResponse: {
+                __typename: 'Mutation',
+                updateStoreProduct: {
+                  product: {
+                    id: this.state.productId, 
+                    name: this.state.name,
+                    price: this.state.price,
+                    storeId: this.state.storeId,
+                    isOptimistic: true,
+                    __typename: 'ProductNode',
+                  },
+                  __typename: 'UpdateProductMutationPayload',
+                },
+              },
+              update: (
+                proxy,
+                {
+                  data: {
+                    updateStoreProduct: {product},
+                  },
+                },
+              ) => {
+                const data = proxy.readQuery({
+                  query: GET_STORE_DETAIL,
+                  variables: this.state,
+                });
+
+                const newListWithoutUpdatedProduct = data.store.products.edges.filter(product => product.node.id !== this.state.productId)
+                console.log(newListWithoutUpdatedProduct, 'HERHEHREHRHEHEHR', product)
+                newListWithoutUpdatedProduct.push({
+                  node: product,
+                  __typename: 'ProductNodeEdge',
+                });
+
+                console.log(newListWithoutUpdatedProduct, '*****')
+
+                proxy.writeQuery({
+                  query: GET_STORE_DETAIL,
+                  variables: this.state,
+                  newListWithoutUpdatedProduct,
+                });
+              }
+            })
+          }
+          return (
+          <form onSubmit={handleUpdateSubmit}>
+            <input
+              type="text"
+              id="productName"
+              name="name"
+              placeholder="Product Name"
+              required
+              value={this.state.name}
+              onChange={this.handleChange}
+              />
+            <br />
+            <input
+              type="number"
+              step="0.01"
+              id="price"
+              name="price"
+              placeholder="Product Price"
+              required
+              value={this.state.price}
+              onChange={this.handleChange}
+              />
+            <button type="submit" disabled={this.state.saving}>Update Product</button>
+            <button onClick={this.props.onListButtonClick}>Back To List</button>
+          </form>
+          )
+        }}
+      </Mutation>
     )
   }
 }
@@ -188,7 +262,6 @@ export default class StoreDetail extends React.Component {
   }
 
   onEditColumnClick = (props) => {
-    console.log(props, '******')
     this.setState({ 
       componentToLoad: "update",
       productToUpdate: props.product
@@ -230,7 +303,7 @@ export default class StoreDetail extends React.Component {
         <Query
           query={GET_STORE_DETAIL}
           variables={{
-            storeId: this.props.match.params.storeId,
+            storeId: this.props.match.params.storeId || "U3RvcmVOb2RlOjE=",
           }}>
           {({loading, error, data}) => {
             if (loading) return 'Loading...';
