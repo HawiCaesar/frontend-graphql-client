@@ -37,23 +37,22 @@ const ADD_PRODUCT_TO_STORE = gql`
 `;
 
 const UPDATE_PRODUCT_IN_STORE = gql`
-mutation UpdateStoreProduct($storeId: ID!, $productId: ID!, $name: String, $price: Float){
-  updateStoreProduct(input: {
-    id: $productId
-    storeId: $storeId
-    name: $name
-    price: $price
-  }) {
-    product {
-      id
-      name
-      price
-      store {
+  mutation UpdateStoreProduct(
+    $productId: ID!
+    $storeId: ID!
+    $name: String
+    $price: Float
+  ) {
+    updateStoreProduct(
+      input: {id: $productId, storeId: $storeId, name: $name, price: $price}
+    ) {
+      product {
         id
+        name
+        price
       }
     }
   }
-}
 `;
 
 class CreateStore extends React.Component {
@@ -147,38 +146,23 @@ class CreateStore extends React.Component {
 
 class UpdateStoreProducts extends React.Component {
   state = {
-		name: this.props.productToUpdate.name || '',
-		price: this.props.productToUpdate.price || '',
+    name: this.props.productToUpdate.name || '',
+    price: this.props.productToUpdate.price || '',
     storeId: this.props.storeId,
     productId: this.props.productToUpdate.id || '',
-    saving: false
-	}
+    saving: false,
+  };
 
-	handleChange = event => {
-		this.setState({ [event.target.name]:  event.target.value});
-  }
+  handleChange = event => {
+    this.setState({[event.target.name]: event.target.value});
+  };
   render() {
-    console.log(this.props.storeId, '@!@@!!@!@@!!@!@')
     return (
       <Mutation mutation={UPDATE_PRODUCT_IN_STORE} variables={this.state}>
         {(mutate, {data}) => {
           const handleUpdateSubmit = async e => {
             e.preventDefault();
             mutate({
-              optimisticResponse: {
-                __typename: 'Mutation',
-                updateStoreProduct: {
-                  product: {
-                    id: this.state.productId, 
-                    name: this.state.name,
-                    price: this.state.price,
-                    storeId: this.state.storeId,
-                    isOptimistic: true,
-                    __typename: 'ProductNode',
-                  },
-                  __typename: 'UpdateProductMutationPayload',
-                },
-              },
               update: (
                 proxy,
                 {
@@ -191,111 +175,115 @@ class UpdateStoreProducts extends React.Component {
                   query: GET_STORE_DETAIL,
                   variables: this.state,
                 });
-
-                const newListWithoutUpdatedProduct = data.store.products.edges.filter(product => product.node.id !== this.state.productId)
-                console.log(newListWithoutUpdatedProduct, 'HERHEHREHRHEHEHR', product)
-                newListWithoutUpdatedProduct.push({
-                  node: product,
-                  __typename: 'ProductNodeEdge',
-                });
-
-                console.log(newListWithoutUpdatedProduct, '*****')
-
+                data.store.products.edges = data.store.products.edges.map(
+                  productEdge => {
+                    if (productEdge.node.id === this.state.productId) {
+                      return {
+                        node: product,
+                        __typename: 'ProductNodeEdge',
+                      };
+                    } else {
+                      return productEdge;
+                    }
+                  },
+                );
                 proxy.writeQuery({
                   query: GET_STORE_DETAIL,
                   variables: this.state,
-                  newListWithoutUpdatedProduct,
+                  data,
                 });
-              }
-            })
-          }
+              },
+            });
+          };
           return (
-          <form onSubmit={handleUpdateSubmit}>
-            <input
-              type="text"
-              id="productName"
-              name="name"
-              placeholder="Product Name"
-              required
-              value={this.state.name}
-              onChange={this.handleChange}
+            <form onSubmit={handleUpdateSubmit}>
+              <input
+                type="text"
+                id="productName"
+                name="name"
+                placeholder="Product Name"
+                required
+                value={this.state.name}
+                onChange={this.handleChange}
               />
-            <br />
-            <input
-              type="number"
-              step="0.01"
-              id="price"
-              name="price"
-              placeholder="Product Price"
-              required
-              value={this.state.price}
-              onChange={this.handleChange}
+              <br />
+              <input
+                type="number"
+                step="0.01"
+                id="price"
+                name="price"
+                placeholder="Product Price"
+                required
+                value={this.state.price}
+                onChange={this.handleChange}
               />
-            <button type="submit" disabled={this.state.saving}>Update Product</button>
-            <button onClick={this.props.onListButtonClick}>Back To List</button>
-          </form>
-          )
+              <button type="submit" disabled={this.state.saving}>
+                Update Product
+              </button>
+              <button onClick={this.props.onListButtonClick}>
+                Back To List
+              </button>
+            </form>
+          );
         }}
       </Mutation>
-    )
+    );
   }
 }
 
-class EditButton extends React.Component{
-
+class EditButton extends React.Component {
   onHandleClick = () => {
-    this.props.onEditColumnClick(this.props)
-  }
+    this.props.onEditColumnClick(this.props);
+  };
   render() {
-    return(
-      <button onClick={this.onHandleClick}>---Edit---</button>
-    )
+    return <button onClick={this.onHandleClick}>---Edit---</button>;
   }
 }
 
 export default class StoreDetail extends React.Component {
-
   state = {
-    componentToLoad: "list",
+    componentToLoad: 'list',
     productToUpdate: {},
-    storeProducts: []
-  }
+    storeProducts: [],
+  };
 
-  onEditColumnClick = (props) => {
-    this.setState({ 
-      componentToLoad: "update",
-      productToUpdate: props.product
-    })
-  }
+  onEditColumnClick = props => {
+    this.setState({
+      componentToLoad: 'update',
+      productToUpdate: props.product,
+    });
+  };
 
-  onloadProducts = (products) => {
-    this.setState({storeProducts: products})
-  }
+  onloadProducts = products => {
+    this.setState({storeProducts: products});
+  };
 
   onAddButtonClick = () => {
-    this.setState({ componentToLoad: "create" });
-  }
+    this.setState({componentToLoad: 'create'});
+  };
 
   onListButtonClick = () => {
-    this.setState({ componentToLoad: "list"})
-  }
+    this.setState({componentToLoad: 'list'});
+  };
 
   render() {
-
-    if (this.state.componentToLoad === "create") {
+    if (this.state.componentToLoad === 'create') {
       return (
-        <CreateStore storeId={this.props.match.params.storeId} onListButtonClick={this.onListButtonClick} />
-      )
+        <CreateStore
+          storeId={this.props.match.params.storeId}
+          onListButtonClick={this.onListButtonClick}
+        />
+      );
     }
 
-    if (this.state.componentToLoad === "update") {
+    if (this.state.componentToLoad === 'update') {
       return (
         <UpdateStoreProducts
           productToUpdate={this.state.productToUpdate}
-          storeId={this.props.match.params.storeId} 
+          storeId={this.props.match.params.storeId}
           onListButtonClick={this.onListButtonClick}
         />
-      )
+      );
     }
 
     return (
@@ -303,7 +291,7 @@ export default class StoreDetail extends React.Component {
         <Query
           query={GET_STORE_DETAIL}
           variables={{
-            storeId: this.props.match.params.storeId || "U3RvcmVOb2RlOjE=",
+            storeId: this.props.match.params.storeId || 'U3RvcmVOb2RlOjE=',
           }}>
           {({loading, error, data}) => {
             if (loading) return 'Loading...';
@@ -316,7 +304,12 @@ export default class StoreDetail extends React.Component {
                   style={{opacity: product.isOptimistic ? '0.5' : '1'}}>
                   <td>{product.node.name}</td>
                   <td>{product.node.price}</td>
-                  <td><EditButton onEditColumnClick={this.onEditColumnClick} product={product.node}/></td>
+                  <td>
+                    <EditButton
+                      onEditColumnClick={this.onEditColumnClick}
+                      product={product.node}
+                    />
+                  </td>
                 </tr>
               ),
             );
@@ -344,5 +337,4 @@ export default class StoreDetail extends React.Component {
       </div>
     );
   }
-  
 }
