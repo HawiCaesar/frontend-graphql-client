@@ -4,20 +4,27 @@ import {Connect, query, mutation} from 'urql';
 
 const GetStoreListQuery = `
 	query StoreList {
-		allUsers {
-			edges {
-				node {
-					id
-					firstName
-					lastName
-				}
-			}
-		}
 		allStores {
 			edges {
 				node {
 					id
 					name
+				}
+			}
+		}
+	}
+`;
+
+const GetStoreListWithOwnerQuery = `
+	query StoreWithOwnerList {
+		allStores {
+			edges {
+				node {
+					id
+					name
+					owner {
+						id
+					}
 				}
 			}
 		}
@@ -38,6 +45,39 @@ const AddStoreQuery = `
 		}
 	}
 `;
+
+class WithOwner extends Component {
+  state = {
+    withOwner: true,
+  };
+
+  render() {
+    if (!this.state.withOwner) {
+      return (
+        <a href="#" onClick={() => this.setState({withOwner: true})}>
+          Toggle
+        </a>
+      );
+    }
+    if (this.state.withOwner)
+      return (
+        <div>
+          <a href="#" onClick={() => this.setState({withOwner: false})}>
+            Toggle
+          </a>
+          <Connect query={query(GetStoreListWithOwnerQuery)}>
+            {({loaded, fetching, refetch, data, error}) => {
+              if (data) {
+                return <div>{data.allStores.edges.length}</div>;
+              } else {
+                return <div>Whatttt</div>;
+              }
+            }}
+          </Connect>
+        </div>
+      );
+  }
+}
 
 class App extends Component {
   render() {
@@ -63,6 +103,7 @@ class App extends Component {
             );
           }}
         </Connect>
+        <WithOwner />
       </div>
     );
   }
