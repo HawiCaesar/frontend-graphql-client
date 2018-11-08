@@ -93,6 +93,7 @@ class ProductNode(DjangoObjectType):
         model = models.Product
         filter_fields = {
                 'store': ['exact'],
+                'name': ['exact', 'icontains'],
                 }
         interfaces = (relay.Node,)
 
@@ -126,6 +127,20 @@ class Query(graphene.ObjectType):
 
     order_item = relay.Node.Field(OrderItemNode)
     all_order_items = DjangoFilterConnectionField(OrderItemNode)
+
+
+class CreateStoreMutation(relay.ClientIDMutation):
+    class Input:
+        name = graphene.String(required=True)
+        owner_id = graphene.ID(required=True)
+
+    store = graphene.Field(StoreNode)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, **data):
+        owner = graphene.Node.get_node_from_global_id(info, data['owner_id'])
+        store = models.Store.objects.create(name=data['name'], owner=owner)
+        return CreateStoreMutation(store=store)
 
 
 class CreateProductMutation(relay.ClientIDMutation):
@@ -168,6 +183,7 @@ class UpdateProductMutation(relay.ClientIDMutation):
 
 
 class Mutation(ObjectType):
+    add_store = CreateStoreMutation.Field()
     add_product_to_store = CreateProductMutation.Field()
     update_store_product = UpdateProductMutation.Field()
 
