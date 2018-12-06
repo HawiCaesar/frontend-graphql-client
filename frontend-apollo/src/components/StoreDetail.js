@@ -1,6 +1,10 @@
 import React from 'react';
 import {Query, Mutation} from 'react-apollo';
 import gql from 'graphql-tag';
+import {matchFinder, ROOT} from 'apollo-cache-invalidation';
+import {del} from 'object-path';
+
+import {GET_STORE_LIST} from './StoreList';
 
 const GET_STORE_DETAIL = gql`
   query StoreDetail($storeId: ID!) {
@@ -8,10 +12,12 @@ const GET_STORE_DETAIL = gql`
       id
       name
       owner {
+        id
+        username
         firstName
         lastName
       }
-      products {
+      products(name_Icontains: "a") {
         edges {
           node {
             id
@@ -162,7 +168,25 @@ class UpdateStoreProducts extends React.Component {
         {(mutate, {data}) => {
           const handleUpdateSubmit = async e => {
             e.preventDefault();
-            mutate();
+            mutate({
+              update: (proxy, result) => {
+                const objectCacheData = proxy.data.data;
+                matchFinder(objectCacheData, [
+                  [new RegExp(this.props.storeId + '.*products', 'g')],
+                  [new RegExp(this.props.storeId, 'g'), /products/],
+                  [ROOT, new RegExp(this.props.storeId, 'g')],
+                ]).forEach(path => {
+                  path.length === 1 && path[0] === ROOT
+                    ? Object.keys(objectCacheData[ROOT]).forEach(key => {
+                        console.log(key);
+                        del(objectCacheData, [ROOT, key]);
+                      })
+                    : del(objectCacheData, path);
+                });
+                console.log(proxy.data.data);
+              },
+              // refetchQueries: [{query: GET_STORE_LIST}],
+            });
           };
           return (
             <form onSubmit={handleUpdateSubmit}>
@@ -286,6 +310,10 @@ export default class StoreDetail extends React.Component {
             return (
               <div>
                 <h1>Store: {data.store.name}</h1>
+                <div>
+                  {data.store.owner.firstName}
+                  {data.store.owner.lastName}
+                </div>
                 <table>
                   <thead>
                     <tr>

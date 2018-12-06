@@ -1,9 +1,11 @@
+# from time import sleep
 import graphene
 import graphene_django_optimizer as gql_optimizer  # noqa
 from django.contrib.auth.models import User
 from graphene import ObjectType, relay
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.types import DjangoObjectType
+from graphql_relay.connection.arrayconnection import offset_to_cursor
 
 from . import models
 
@@ -71,11 +73,11 @@ class UserNode(DjangoObjectType):
     class Meta:
         model = User
         exclude_fields = (
-                'password',
-                )
+            'password',
+        )
         filter_fields = {
-                'first_name': ['contains'],
-                }
+            'first_name': ['contains'],
+        }
         interfaces = (relay.Node,)
 
 
@@ -83,8 +85,8 @@ class StoreNode(DjangoObjectType):
     class Meta:
         model = models.Store
         filter_fields = {
-                'name': ['contains'],
-                }
+            'name': ['contains'],
+        }
         interfaces = (relay.Node,)
 
 
@@ -92,9 +94,9 @@ class ProductNode(DjangoObjectType):
     class Meta:
         model = models.Product
         filter_fields = {
-                'store': ['exact'],
-                'name': ['exact', 'icontains'],
-                }
+            'store': ['exact'],
+            'name': ['exact', 'icontains'],
+        }
         interfaces = (relay.Node,)
 
 
@@ -143,23 +145,28 @@ class CreateStoreMutation(relay.ClientIDMutation):
         return CreateStoreMutation(store=store)
 
 
+ProductEdge = ProductNode._meta.connection.Edge
+
+
 class CreateProductMutation(relay.ClientIDMutation):
     class Input:
         store_id = graphene.ID(required=True)
         name = graphene.String(required=True)
         price = graphene.Float(required=True)
 
-    product = graphene.Field(ProductNode)
+    product_edge = graphene.Field(ProductEdge)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **data):
         store = graphene.Node.get_node_from_global_id(info, data['store_id'])
         product = models.Product.objects.create(
-                store=store,
-                name=data['name'],
-                price=data['price'],
-                )
-        return CreateProductMutation(product=product)
+            store=store,
+            name=data['name'],
+            price=data['price'],
+        )
+        return CreateProductMutation(
+            product_edge=ProductEdge(cursor=offset_to_cursor(0), node=product),
+        )
 
 
 class UpdateProductMutation(relay.ClientIDMutation):
@@ -176,7 +183,8 @@ class UpdateProductMutation(relay.ClientIDMutation):
         product = graphene.Node.get_node_from_global_id(info, data.pop('id'))
         store_id = data.pop('store_id', None)
         if store_id:
-            product.store = graphene.Node.get_node_from_global_id(info, store_id)
+            product.store = graphene.Node.get_node_from_global_id(
+                info, store_id)
         vars(product).update(data)
         product.save()
         return UpdateProductMutation(product=product)

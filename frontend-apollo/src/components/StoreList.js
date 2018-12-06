@@ -3,7 +3,7 @@ import {Query} from 'react-apollo';
 import {Link} from 'react-router-dom';
 import gql from 'graphql-tag';
 
-const GET_STORE_LIST = gql`
+export const GET_STORE_LIST = gql`
   query StoreList {
     allStores {
       edges {
@@ -11,7 +11,8 @@ const GET_STORE_LIST = gql`
           id
           name
           owner {
-            firstName
+            id
+            username
           }
         }
       }

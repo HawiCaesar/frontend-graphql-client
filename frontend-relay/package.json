@@ -3,15 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "babel-plugin-relay": "^1.7.0-rc.1",
+    "babel-plugin-relay": "^1.7.0",
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
-    "react-relay": "^1.7.0-rc.1",
+    "react-relay": "^1.7.0",
     "react-scripts": "next",
-    "relay-compiler": "^1.7.0-rc.1"
+    "relay-compiler": "^1.7.0"
   },
   "scripts": {
-		"start": "react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "relay": "relay-compiler --schema ../server/relay-schema.json --src ./src --extensions js jsx",
     "test": "react-scripts test",
