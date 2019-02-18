@@ -69,7 +69,7 @@ class StoreCount extends Component {
           >
             {({ loaded, fetching, refetch, data, error }) => {
               if (data) {
-                return <div>{data.allStores.edges.length}</div>;
+                return <div>{data.allStores}</div>;
               } else {
                 return <div>Whatttt</div>;
               }
